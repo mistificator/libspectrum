@@ -24,6 +24,21 @@ add_executable(make-perl
 find_package(Perl REQUIRED)
 include(cmake/config.cmake)
 
+if (HAVE_ZLIB_H)
+    target_sources(${PROJECT_NAME}
+        PRIVATE
+        zip.c
+        zlib.c
+    )
+endif()
+
+if (HAVE_LIBBZ2)
+    target_sources(${PROJECT_NAME}
+        PRIVATE
+        bzip2.c
+    )
+endif()
+
 add_custom_command(
     OUTPUT ${SRCDIR}/generate.pl
     COMMAND ${BINDIR}/make-perl > ${SRCDIR}/tmp.pl
@@ -111,14 +126,14 @@ if (NOT DEFINED ${HAVE_LIB_GLIB})
     )
 endif()
 
-add_custom_target(__perl_scripts
+add_custom_target(__perl_scripts_${PROJECT_NAME}
     SOURCES
     accessor.pl generate.pl generate.pl.in  tape_accessors.pl  tape_set.pl
     snap_accessors.txt tape_accessors.txt
     libspectrum.h.in libspectrum.h
 )
 
-add_custom_target(__autotools_files
+add_custom_target(__autotools_files_${PROJECT_NAME}
     SOURCES
     configure.ac Makefile.am config.h
 )

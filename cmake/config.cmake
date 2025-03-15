@@ -1,36 +1,41 @@
-# built-in packages
+find_package(PkgConfig)
 
 function(set_define variable)
     set(${variable})
     add_definitions(-D${variable})
 endfunction()
 
+# packages
+
+pkg_check_modules (GLIB2 glib-2.0)
+if (GLIB2_VERSION)
+    set_define(HAVE_LIB_GLIB)
+endif()
+
 find_package(ZLIB)
-if (${ZLIB_FOUND})
+if (ZLIB_FOUND)
     set_define(HAVE_ZLIB_H)
-    target_sources(${PROJECT_NAME}
-        PRIVATE
-        zip.c
-        zlib.c
-    )
 endif()
 
 find_package(BZip2)
-if (${BZIP2_FOUND})
+if (BZIP2_FOUND)
     set_define(HAVE_LIBBZ2)
-    target_sources(${PROJECT_NAME}
-        PRIVATE
-        bzip2.c
-    )
 endif()
 
-# other packages
+find_library(LIBM m)
+if (LIBM)
+    set_define(HAVE_LIBM)
+endif()
 
-include(FindPkgConfig)
+find_library(LIBXML2 xml2)
+if (LIBXML2)
+    set_define(HAVE_LIBXML2)
+endif()
 
-pkg_check_modules (GLIB2 glib-2.0)
-if (${GLIB2_VERSION})
-    set_define(HAVE_LIB_GLIB)
+find_package(Threads)
+if (CMAKE_USE_PTHREADS_INIT)
+    set_define(HAVE_PTHREAD)
+    set_define(HAVE_PTHREAD_PRIO_INHERIT)
 endif()
 
 # checks
@@ -55,19 +60,31 @@ endfunction()
 check_include(dlfcn.h      HAVE_DLFCN_H)
 check_include(gcrypt.h     HAVE_GCRYPT_H)
 check_include(inttypes.h   HAVE_INTTYPES_H)
+check_include(jsw.h        HAVE_JSW_H)
+check_include(libgen.h     HAVE_LIBGEN_H)
+check_include(siginfo.h    HAVE_SIGINFO_H)
 check_include(stdint.h     HAVE_STDINT_H)
 check_include(stdio.h      HAVE_STDIO_H)
 check_include(stdlib.h     HAVE_STDLIB_H)
 check_include(strings.h    HAVE_STRINGS_H)
 check_include(string.h     HAVE_STRING_H)
+check_include(sys/audioio.h HAVE_SYS_AUDIOIO_H)
+check_include(sys/audio.h  HAVE_SYS_AUDIO_H)
+check_include(sys/soundcard.h HAVE_SYS_SOUNDCARD_H)
 check_include(sys/stat.h   HAVE_SYS_STAT_H)
 check_include(sys/types.h  HAVE_SYS_TYPES_H)
 check_include(unistd.h     HAVE_UNISTD_H)
+check_include(X11/extensions/XShm.h HAVE_X11_EXTENSIONS_XSHM_H)
+check_include(zlib.h       HAVE_ZLIB_H)
 
 if (NOT ${MSVC})
     check_include(stdatomic.h  HAVE_STDATOMIC_H)
 endif()
 
+check_function(dirname       HAVE_DIRNAME)
+check_function(fsync         HAVE_FSYNC)
+check_function(geteuid       HAVE_GETEUID)
+check_function(getopt_long   HAVE_GETOPT_LONG)
 check_function(snprintf      HAVE_SNPRINTF)
 check_function(strcasecmp    HAVE_STRCASECMP)
 check_function(strncasecmp   HAVE_STRNCASECMP)

@@ -20,7 +20,9 @@
    BogDan Vatra <bogdan@kde.org>
 */
 
-#include "config.h"
+#ifdef HAVE_CONFIG
+    #include "config.h"
+#endif
 
 #include <stdatomic.h>
 

@@ -21,7 +21,9 @@
 
 */
 
-#include "config.h"
+#ifdef HAVE_CONFIG
+    #include "config.h"
+#endif
 
 #ifndef HAVE_LIB_GLIB		/* Use this iff we're not using the 
 				   `proper' glib */

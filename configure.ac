@@ -62,6 +62,7 @@ AC_SUBST(LIBSPECTRUM_COPYRIGHT)
 AC_SUBST(LIBSPECTRUM_URL)
 
 dnl Definitions for config.h
+AC_DEFINE (HAVE_CONFIG)
 AC_DEFINE([LIBSPECTRUM_RC_VERSION], [libspectrum_rc_version],
           [Define version information for win32 dll library])
 AC_DEFINE([LIBSPECTRUM_COPYRIGHT], [libspectrum_copyright],

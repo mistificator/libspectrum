@@ -10,6 +10,7 @@ endfunction()
 pkg_check_modules (GLIB2 glib-2.0)
 if (GLIB2_VERSION)
     set_define(HAVE_LIB_GLIB)
+    include_directories(${GLIB2_INCLUDE_DIRS})
 endif()
 
 find_package(ZLIB)

@@ -136,6 +136,7 @@ int main(void)
 "typedef gint gboolean;\n"
 "typedef unsigned int guint;\n"
 "typedef unsigned long gulong;\n"
+"typedef size_t gsize;\n"
 "typedef const void * gconstpointer;\n"
 "typedef void * gpointer;\n"
 "\n"
@@ -303,6 +304,10 @@ int main(void)
     printf( "#define GINT_TO_POINTER(i)      ((gpointer)  (glong)(i))\n" );
     printf( "#define GPOINTER_TO_INT(p)      ((gint)   (glong)(p))\n" );
     printf( "#define GPOINTER_TO_UINT(p)     ((guint)  (gulong)(p))\n" );
+  } else if( sizeof( void* ) == sizeof( size_t ) ) {
+    printf( "#define GINT_TO_POINTER(i)      ((gpointer)  (gsize)(i))\n" );
+    printf( "#define GPOINTER_TO_INT(p)      ((gsize)   (p))\n" );
+    printf( "#define GPOINTER_TO_UINT(p)     ((gsize)   (p))\n" );
   } else {
     fprintf( stderr, "No plausible int to pointer cast found\n" );
     return 1;

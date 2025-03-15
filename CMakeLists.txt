@@ -27,8 +27,8 @@ include(cmake/config.cmake)
 add_custom_command(
     OUTPUT ${SRCDIR}/generate.pl
     COMMAND ${BINDIR}/make-perl > ${SRCDIR}/tmp.pl
-    COMMAND cat ${SRCDIR}/tmp.pl ${SRCDIR}/generate.pl.in > ${SRCDIR}/generate.pl
-    COMMAND rm ${SRCDIR}/tmp.pl
+    COMMAND ${CMAKE_COMMAND} -E cat ${SRCDIR}/tmp.pl ${SRCDIR}/generate.pl.in > ${SRCDIR}/generate.pl
+    COMMAND ${CMAKE_COMMAND} -E rm ${SRCDIR}/tmp.pl
     DEPENDS make-perl ${SRCDIR}/generate.pl.in
     VERBATIM
 )
@@ -96,8 +96,6 @@ target_sources(${PROJECT_NAME}
     z80em.c
     zxs.c
 
-    myglib/garray.c  myglib/ghash.c  myglib/glock.c  myglib/gslist.c
-
     ${SRCDIR}/snap_accessors.c
     ${SRCDIR}/tape_accessors.c
     ${SRCDIR}/tape_set.c
@@ -105,6 +103,13 @@ target_sources(${PROJECT_NAME}
     PUBLIC
     internals.h  ${SRCDIR}/libspectrum.h  tape_block.h  zip.h
 )
+
+if (NOT DEFINED ${HAVE_LIB_GLIB})
+    target_sources(${PROJECT_NAME}
+        PRIVATE
+        myglib/garray.c  myglib/ghash.c  myglib/glock.c  myglib/gslist.c
+    )
+endif()
 
 add_custom_target(__perl_scripts
     SOURCES

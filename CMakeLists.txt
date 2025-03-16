@@ -8,15 +8,14 @@ add_library(${PROJECT_NAME} SHARED)
 add_definitions(-DVERSION="1.5.0.0" -DLIBSPECTRUM_EXPORTS)
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
-set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(BINDIR ${SRCDIR}/bin/)
+set(BINDIR ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINDIR})
 set(CMAKE_BINARY_DIR  ${BINDIR})
 set(EXECUTABLE_OUTPUT_PATH ${BINDIR})
 set(LIBRARY_OUTPUT_PATH ${BINDIR})
 set(CMAKE_CACHEFILE_DIR ${BINDIR})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${SRCDIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(make-perl
     make-perl.c)
@@ -30,6 +29,10 @@ if (HAVE_ZLIB_H)
         zip.c
         zlib.c
     )
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+        z
+    )
 endif()
 
 if (HAVE_LIBBZ2)
@@ -37,44 +40,64 @@ if (HAVE_LIBBZ2)
         PRIVATE
         bzip2.c
     )
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+        bz2
+    )
 endif()
 
+if (HAVE_LIB_GLIB)
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+        ${GLIB2_LIBRARIES}
+    )
+endif()
+
+set(CHDIR ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_custom_command(
-    OUTPUT ${SRCDIR}/generate.pl
-    COMMAND ${BINDIR}/make-perl > ${SRCDIR}/tmp.pl
-    COMMAND ${CMAKE_COMMAND} -E cat ${SRCDIR}/tmp.pl ${SRCDIR}/generate.pl.in > ${SRCDIR}/generate.pl
-    COMMAND ${CMAKE_COMMAND} -E rm ${SRCDIR}/tmp.pl
-    DEPENDS make-perl ${SRCDIR}/generate.pl.in
+    OUTPUT generate.pl
+    COMMAND ${CHDIR} ${BINDIR}/make-perl > ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
+    COMMAND ${CHDIR} ${CMAKE_COMMAND} -E cat ./tmp.pl generate.pl.in > generate.pl
+    COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
+    DEPENDS make-perl generate.pl.in
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT ${SRCDIR}/libspectrum.h
-    COMMAND ${PERL_EXECUTABLE} -p ${SRCDIR}/generate.pl ${SRCDIR} ${SRCDIR}/libspectrum.h.in > ${SRCDIR}/libspectrum.h
-    DEPENDS ${SRCDIR}/snap_accessors.txt ${SRCDIR}/tape_accessors.txt ${SRCDIR}/generate.pl
+    OUTPUT libspectrum.h
+    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p generate.pl ./ libspectrum.h.in > libspectrum.h
+    DEPENDS snap_accessors.txt tape_accessors.txt generate.pl
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT ${SRCDIR}/snap_accessors.c
-    COMMAND ${PERL_EXECUTABLE} -p ${SRCDIR}/accessor.pl ${SRCDIR}/snap_accessors.txt > ${SRCDIR}/snap_accessors.c
-    DEPENDS ${SRCDIR}/snap_accessors.txt ${SRCDIR}/accessor.pl
+    OUTPUT snap_accessors.c
+    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p accessor.pl snap_accessors.txt > snap_accessors.c
+    DEPENDS snap_accessors.txt accessor.pl
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT ${SRCDIR}/tape_accessors.c
-    COMMAND ${PERL_EXECUTABLE} -p ${SRCDIR}/tape_accessors.pl ${SRCDIR}/tape_accessors.txt > ${SRCDIR}/tape_accessors.c
-    DEPENDS ${SRCDIR}/tape_accessors.txt ${SRCDIR}/tape_accessors.pl
+    OUTPUT tape_accessors.c
+    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p tape_accessors.pl tape_accessors.txt > tape_accessors.c
+    DEPENDS tape_accessors.txt tape_accessors.pl
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT ${SRCDIR}/tape_set.c
-    COMMAND ${PERL_EXECUTABLE} -p ${SRCDIR}/tape_set.pl ${SRCDIR}/tape_accessors.txt > ${SRCDIR}/tape_set.c
-    DEPENDS ${SRCDIR}/tape_accessors.txt ${SRCDIR}/tape_set.pl
+    OUTPUT tape_set.c
+    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p tape_set.pl tape_accessors.txt > tape_set.c
+    DEPENDS tape_accessors.txt tape_set.pl
     VERBATIM
 )
+
+add_custom_target(generated_${PROJECT_NAME}
+    SOURCES
+    generate.pl libspectrum.h snap_accessors.c tape_accessors.c tape_set.c
+)
+
+add_dependencies(${PROJECT_NAME} generated_${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
@@ -111,12 +134,12 @@ target_sources(${PROJECT_NAME}
     z80em.c
     zxs.c
 
-    ${SRCDIR}/snap_accessors.c
-    ${SRCDIR}/tape_accessors.c
-    ${SRCDIR}/tape_set.c
+    snap_accessors.c
+    tape_accessors.c
+    tape_set.c
 
     PUBLIC
-    internals.h  ${SRCDIR}/libspectrum.h  tape_block.h  zip.h
+    internals.h  libspectrum.h  tape_block.h  zip.h
 )
 
 if (NOT DEFINED ${HAVE_LIB_GLIB})

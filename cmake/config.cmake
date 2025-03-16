@@ -1,7 +1,7 @@
 find_package(PkgConfig)
 
 function(set_define variable)
-    set(${variable})
+    set(${variable} ON PARENT_SCOPE)
     add_definitions(-D${variable})
 endfunction()
 

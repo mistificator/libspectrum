@@ -1,0 +1,3 @@
+[submodule "myglib/stdatomic-c11-win32"]
+	path = myglib/stdatomic-c11-win32
+	url = https://github.com/mistificator/stdatomic-c11-win32.git

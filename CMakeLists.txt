@@ -141,10 +141,25 @@ target_sources(${PROJECT_NAME}
     internals.h  libspectrum.h  tape_block.h  zip.h
 )
 
-if (NOT DEFINED ${HAVE_LIB_GLIB})
+if (NOT DEFINED ${HAVE_LIB_GLIB})    
+    if (WIN32 AND MSVC)
+        target_sources(${PROJECT_NAME}
+            PRIVATE
+            myglib/stdatomic-c11-win32/stdatomic.h
+            myglib/stdatomic-c11-win32/stdatomic.c
+        )
+    endif()
+
     target_sources(${PROJECT_NAME}
         PRIVATE
         myglib/garray.c  myglib/ghash.c  myglib/glock.c  myglib/gslist.c
+    )
+endif()
+
+if (WIN32)
+    target_sources(${PROJECT_NAME}
+        PRIVATE
+        dll.c
     )
 endif()
 

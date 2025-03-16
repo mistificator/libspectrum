@@ -25,9 +25,10 @@
 #endif
 
 #ifdef HAVE_STDATOMIC_H
-#include <stdatomic.h>
-
-#include "internals.h"
+    #include <stdatomic.h>
+#else
+    #include "stdatomic-c11-win32/stdatomic.h"
+#endif
 
 void
 atomic_lock( atomic_char *lock_ptr )
@@ -48,4 +49,3 @@ atomic_unlock( atomic_char *lock_ptr )
     locked = ATOMIC_VAR_INIT( 1 );
   } while( !atomic_compare_exchange_strong( lock_ptr, &locked, unlocked ) );
 }
-#endif

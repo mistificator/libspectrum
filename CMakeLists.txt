@@ -8,13 +8,6 @@ add_library(${PROJECT_NAME} SHARED)
 add_definitions(-DVERSION="1.5.0.0" -DLIBSPECTRUM_EXPORTS)
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
-set(BINDIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINDIR})
-set(CMAKE_BINARY_DIR  ${BINDIR})
-set(EXECUTABLE_OUTPUT_PATH ${BINDIR})
-set(LIBRARY_OUTPUT_PATH ${BINDIR})
-set(CMAKE_CACHEFILE_DIR ${BINDIR})
-
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(make-perl
@@ -59,7 +52,7 @@ set(RM ${CMAKE_COMMAND} -E rm -f --)
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/generate.pl
     COMMAND ${RM} ${CMAKE_CURRENT_SOURCE_DIR}/generate.pl
-    COMMAND ${BINDIR}/make-perl > ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/make-perl > ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
     COMMAND ${CHDIR} ${CMAKE_COMMAND} -E cat tmp.pl generate.pl.in > ${CMAKE_CURRENT_SOURCE_DIR}/generate.pl
     COMMAND ${RM} ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
     DEPENDS make-perl generate.pl.in
@@ -98,12 +91,12 @@ add_custom_command(
     VERBATIM
 )
 
-add_custom_target(generated_${PROJECT_NAME}
+add_custom_target(__generated_${PROJECT_NAME}
     SOURCES
     generate.pl libspectrum.h snap_accessors.c tape_accessors.c tape_set.c
 )
 
-add_dependencies(${PROJECT_NAME} generated_${PROJECT_NAME})
+add_dependencies(${PROJECT_NAME} __generated_${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE

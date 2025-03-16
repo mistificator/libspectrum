@@ -8,7 +8,7 @@ add_library(${PROJECT_NAME} SHARED)
 add_definitions(-DVERSION="1.5.0.0" -DLIBSPECTRUM_EXPORTS)
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
-set(BINDIR ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
+set(BINDIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINDIR})
 set(CMAKE_BINARY_DIR  ${BINDIR})
 set(EXECUTABLE_OUTPUT_PATH ${BINDIR})
@@ -54,40 +54,46 @@ if (HAVE_LIB_GLIB)
 endif()
 
 set(CHDIR ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR})
+set(RM ${CMAKE_COMMAND} -E rm -f --)
 
 add_custom_command(
-    OUTPUT generate.pl
-    COMMAND ${CHDIR} ${BINDIR}/make-perl > ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
-    COMMAND ${CHDIR} ${CMAKE_COMMAND} -E cat ./tmp.pl generate.pl.in > generate.pl
-    COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/generate.pl
+    COMMAND ${RM} ${CMAKE_CURRENT_SOURCE_DIR}/generate.pl
+    COMMAND ${BINDIR}/make-perl > ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
+    COMMAND ${CHDIR} ${CMAKE_COMMAND} -E cat tmp.pl generate.pl.in > ${CMAKE_CURRENT_SOURCE_DIR}/generate.pl
+    COMMAND ${RM} ${CMAKE_CURRENT_SOURCE_DIR}/tmp.pl
     DEPENDS make-perl generate.pl.in
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT libspectrum.h
-    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p generate.pl ./ libspectrum.h.in > libspectrum.h
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/libspectrum.h
+    COMMAND ${RM} ${CMAKE_CURRENT_SOURCE_DIR}/libspectrum.h
+    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p generate.pl ./ libspectrum.h.in > ${CMAKE_CURRENT_SOURCE_DIR}/libspectrum.h
     DEPENDS snap_accessors.txt tape_accessors.txt generate.pl
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT snap_accessors.c
-    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p accessor.pl snap_accessors.txt > snap_accessors.c
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/snap_accessors.c
+    COMMAND ${RM} ${CMAKE_CURRENT_SOURCE_DIR}/snap_accessors.c
+    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p accessor.pl snap_accessors.txt > ${CMAKE_CURRENT_SOURCE_DIR}/snap_accessors.c
     DEPENDS snap_accessors.txt accessor.pl
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT tape_accessors.c
-    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p tape_accessors.pl tape_accessors.txt > tape_accessors.c
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/tape_accessors.c
+    COMMAND ${RM} ${CMAKE_CURRENT_SOURCE_DIR}/tape_accessors.c
+    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p tape_accessors.pl tape_accessors.txt > ${CMAKE_CURRENT_SOURCE_DIR}/tape_accessors.c
     DEPENDS tape_accessors.txt tape_accessors.pl
     VERBATIM
 )
 
 add_custom_command(
-    OUTPUT tape_set.c
-    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p tape_set.pl tape_accessors.txt > tape_set.c
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/tape_set.c
+    COMMAND ${RM} ${CMAKE_CURRENT_SOURCE_DIR}/tape_set.c
+    COMMAND ${CHDIR} ${PERL_EXECUTABLE} -p tape_set.pl tape_accessors.txt > ${CMAKE_CURRENT_SOURCE_DIR}/tape_set.c
     DEPENDS tape_accessors.txt tape_set.pl
     VERBATIM
 )
